@@ -1,0 +1,21 @@
+{
+    "bc-selection-task": {
+        "processRun2": "true",
+        "processRun3": "false"
+    },
+    "event-selection-task": {
+        "processRun2": "true",
+        "processRun3": "false"
+    },
+    "net-proton-cumulants": {
+        "fMomMinLoose": 0.2,
+        "fMomMaxLoose": 10,
+        "fChi2NdfMaxLoose": 4,
+        "fEtaMaxLoose": 0.9,
+        "fMomMin": 0.2,
+        "fMomMax": 10,
+        "fChi2NdfMax": 2.5,
+        "fEtaMax": 0.8,
+        "fNTPCClusterMin": 80
+    }
+}

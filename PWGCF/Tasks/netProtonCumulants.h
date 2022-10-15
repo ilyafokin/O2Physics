@@ -14,10 +14,32 @@
 #include "Framework/runDataProcessing.h"
 #include "Framework/AnalysisTask.h"
 
+#include "Common/DataModel/PIDResponse.h"
+#include "Common/DataModel/EventSelection.h"
+#include "Common/DataModel/TrackSelectionTables.h"
+#include "Common/DataModel/Centrality.h"
+
 using namespace o2::framework;
 using namespace o2::constants;
 
-const AxisSpec gAxis_eta{400, -0.9, 0.9};
+std::vector<double> etaBinning = {-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0,
+                                   0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8};
+std::vector<double> centBinning = {0, 5, 10, 20, 30, 40, 50, 60, 70, 80};
+
+const AxisSpec gAxis_eta{etaBinning, "#eta"};
+const AxisSpec gAxis_cent{centBinning, "Centrality (%)"};
 const AxisSpec gAxis_phi{400, 0., TwoPI};
 const AxisSpec gAxis_dEdx{1024, 0, 1024};
 const AxisSpec gAxis_ptot{400, 0., 4.};
+const AxisSpec gAxis_chi2ndf{100, 0., 10.};
+const AxisSpec gAxis_ncrossedrows{160, 0., 160.};
+
+template<typename TFloat, typename TArray>
+size_t getBinIndex(TFloat const& x, TArray const& arr)
+{
+    for (size_t idx = 0; idx < arr.size() - 1; idx++)
+        if (x > arr[idx] && x < arr[idx + 1])
+            return idx;
+    throw runtime_error(Form("Error in getBinIndex: %f out of range", x));
+    return 0;
+};
