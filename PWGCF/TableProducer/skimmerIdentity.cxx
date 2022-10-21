@@ -17,6 +17,8 @@
 
 #include "Common/DataModel/Centrality.h"
 #include "Common/DataModel/PIDResponse.h"
+#include "Common/DataModel/EventSelection.h"
+#include "Common/DataModel/TrackSelectionTables.h"
 
 #include "PWGCF/DataModel/IdentityTables.h"
 
@@ -35,8 +37,8 @@ enum eIdentities {
 
 namespace o2::aod
 {
-using myCollisions = soa::Join<aod::Collisions, aod::CentRun2V0Ms>;
-using myTracks = soa::Join<aod::Tracks, aod::TracksExtra, o2::aod::TracksDCA,
+using myCollisions = soa::Join<aod::Collisions, aod::CentRun2V0Ms, aod::EvSels>;
+using myTracks = soa::Join<aod::Tracks, aod::TracksExtra, o2::aod::TracksDCA, aod::TrackSelection,
                            aod::pidTPCFullEl, aod::pidTPCFullPi, aod::pidTPCFullKa, aod::pidTPCFullPr>;
 using myCollision = myCollisions::iterator;
 using myTrack = myTracks::iterator;
@@ -44,27 +46,67 @@ using myTrack = myTracks::iterator;
 
 struct skimmerIdentity {
 
-  Produces<aod::IdentityCollision> fIdentityCollisions;
-  Produces<aod::IdentityTrack> fIdentityTracks;
+  Produces<aod::IdentityCollisions> fIdentityCollisions;
+  Produces<aod::IdentityTracks> fIdentityTracks;
 
-  void process(aod::myCollision const& collision, aod::myTracks const& tracks) {
+  // loose filters to reduce tree size
+  Configurable<float> fMomMinLoose{"fMomMinLoose", 0.25, "minimum momentum"};
+  Configurable<float> fMomMaxLoose{"fMomMaxLoose", 5., "maximum momentum"};
+  Configurable<float> fEtaMaxLoose{"fEtaMaxLoose", 0.8, "maximum pseudorapidity"};
+  Configurable<float> fChi2NdfMaxLoose{"fChi2NdfMaxLoose", 2.5, "maximum chi2/ndf"};
+  Configurable<float> fVertexZMaxLoose{"fVertexZMaxLoose", 10, "maximum vertex z"};
 
-    for (auto const& track : tracks) {
-      fIdentityTracks(track.eta(),
-                      track.phi(),
-                      track.sign(),
-                      track.p(),
-                      track.tpcInnerParam(),
-                      track.pt(),
-                      track.tpcChi2NCl());
+  Filter etaFilter = (nabs(aod::track::eta) < fEtaMaxLoose);
+  Filter chi2NdfFilter = (aod::track::tpcChi2NCl < fChi2NdfMaxLoose);
 
+  Filter momentumRangeFilter = (aod::track::p > fMomMinLoose) && (aod::track::p < fMomMaxLoose);
+  Filter vertexZFilter = (aod::collision::posZ < fVertexZMaxLoose);
+
+  using myFilteredTracks = soa::Filtered<aod::myTracks>;
+  using myFilteredTrack = myFilteredTracks::iterator;
+  using myFilteredCollisions = soa::Filtered<aod::myCollisions>;
+  using myFilteredCollision = myFilteredCollisions::iterator;
+
+  void process(myFilteredCollision const& collision, myFilteredTracks const& tracks) {
+
+    if (collision.sel7() || true) {
+      for (auto const& track : tracks) {
+        if (!track.hasTPC()) continue;
+        float tpcSignalExpected[4] = {//0, 0, 0, 0
+          track.tpcSignal() + track.tpcExpSignalDiffEl(),
+          track.tpcSignal() + track.tpcExpSignalDiffPi(),
+          track.tpcSignal() + track.tpcExpSignalDiffKa(),
+          track.tpcSignal() + track.tpcExpSignalDiffPr()
+        };
+        float tpcSigmaExpected[4] = {0, 0, 0, 0
+          // track.tpcExpSigmaEl(),
+          // track.tpcExpSigmaPi(),
+          // track.tpcExpSigmaKa(),
+          // track.tpcExpSigmaPr()
+        };
+        fIdentityTracks(track.eta(),
+                        track.phi(),
+                        track.sign(),
+                        track.p(),
+                        track.tpcInnerParam(),
+                        track.pt(),
+                        track.tpcChi2NCl(),
+                        track.tpcNClsCrossedRows(),
+                        track.dcaXY(),
+                        track.dcaZ(),
+                        track.passedITSRefit(),
+                        track.itsNClsInnerBarrel() > 0, // todo: this is spd+sdd instead of spd only
+                        track.tpcSignal(),
+                        tpcSignalExpected,
+                        tpcSigmaExpected
+        );
+      }
+
+      fIdentityCollisions(collision.centRun2V0M(),
+                          collision.posZ());
+      
     }
-
-    fIdentityCollisions(collision.centRun2V0M(),
-                        collision.posZ());
-    
   }
-
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)

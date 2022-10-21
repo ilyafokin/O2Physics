@@ -34,7 +34,12 @@ o2physics_add_dpl_workflow(flow-generic-framework
                     PUBLIC_LINK_LIBRARIES O2::Framework O2Physics::AnalysisCore O2Physics::GFWCore
                     COMPONENT_NAME Analysis)
 
-o2physics_add_dpl_workflow(net-proton-cumulants
-                    SOURCES netProtonCumulants.cxx
+o2physics_add_dpl_workflow(net-proton-cumulants-histograms
+                    SOURCES netProtonCumulantsHistograms.cxx
+                    PUBLIC_LINK_LIBRARIES O2::Framework O2::DetectorsBase O2Physics::AnalysisCore O2::DetectorsVertexing
+                    COMPONENT_NAME Analysis)
+
+o2physics_add_dpl_workflow(net-proton-cumulants-identity
+                    SOURCES netProtonCumulantsIdentity.cxx
                     PUBLIC_LINK_LIBRARIES O2::Framework O2::DetectorsBase O2Physics::AnalysisCore O2::DetectorsVertexing
                     COMPONENT_NAME Analysis)

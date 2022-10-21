@@ -10,8 +10,6 @@
 // or submit itself to any jurisdiction.
 
 #include "Framework/AnalysisDataModel.h"
-#include "Common/DataModel/PIDResponse.h"
-#include "Common/DataModel/TrackSelectionTables.h"
 #include <TMath.h>
 
 #include <array>
@@ -21,18 +19,25 @@ namespace o2::aod {
     namespace identitycollision {
         DECLARE_SOA_COLUMN(CentV0, cent, float);                                   //! Centrality
         DECLARE_SOA_COLUMN(VertexZ, vertexZ, float);                               //! Vertex Z position
-        DECLARE_SOA_COLUMN(CollisionW, collisionW, float[4]);
     }; // namespace identitycollision
 
     namespace identitytrack {
         DECLARE_SOA_COLUMN(Eta, eta, float);                                       //! Eta
         DECLARE_SOA_COLUMN(Phi, phi, float);                                       //! Phi
-        DECLARE_SOA_COLUMN(Sign, sign, char);                                     //! Phi
+        DECLARE_SOA_COLUMN(Sign, sign, int);                                       //! Sign
         DECLARE_SOA_COLUMN(P, p, float);                                           //! Momentum at the vertex
         DECLARE_SOA_COLUMN(Ptot, ptot, float);                                     //! Momentum at the TPC inner wall
         DECLARE_SOA_COLUMN(Pt, pt, float);                                         //! Transverse momentum
-        DECLARE_SOA_COLUMN(Chi2Ndf, chi2ndf, float);                               //! Chi2 / number of tpc clusters
-        DECLARE_SOA_COLUMN(Omegas, omegas, float[4]);                              //! probabilities ω for each particle species
+        DECLARE_SOA_COLUMN(TpcChi2NCl, tpcChi2NCl, float);                         //! Chi2 / number of tpc clusters
+        DECLARE_SOA_COLUMN(TpcNClsCrossedRows, tpcNclsCrossedRows, float);         //! Number of TPC crossed rows
+        DECLARE_SOA_COLUMN(Dcaxy, dcaxy, float);                                   //! DCA xy
+        DECLARE_SOA_COLUMN(Dcaz, dcaz, float);                                     //! DCA z
+        DECLARE_SOA_COLUMN(ItsRefit, itsRefit, bool);                              //! ITS refit
+        DECLARE_SOA_COLUMN(ItsPixel, itsPixel, bool);                              //! Hits in ITS pixel detectors
+
+        DECLARE_SOA_COLUMN(TpcSignal, tpcSignal, float);                                     //! tpc signal
+        DECLARE_SOA_COLUMN(TpcSignalExpected, tpcSignalExpected, float[4]);                  //! expected tpc signal means for each particle species
+        DECLARE_SOA_COLUMN(TpcSigmaExpected, tpcSigmaExpected, float[4]);        //! expected tpc signal widths
     }; // namespace identitytrack
 
     namespace identityws {
@@ -44,12 +49,13 @@ namespace o2::aod {
         DECLARE_SOA_COLUMN(Omegas, omegas, float[4]);                              //! probabilities ω for each particle species
     } // namespace identityprobs
     
-    DECLARE_SOA_TABLE(IdentityCollision, "AOD", "IDENTITYCOLL",
+    DECLARE_SOA_TABLE(IdentityCollisions, "AOD", "IDENTITYCOLLS",
                     o2::soa::Index<>,
                     identitycollision::CentV0,
-                    identitycollision::VertexZ);
+                    identitycollision::VertexZ
+                    );
     
-    DECLARE_SOA_TABLE(IdentityTrack, "AOD", "IDENTITYTRACK",
+    DECLARE_SOA_TABLE(IdentityTracks, "AOD", "IDENTITYTRACKS",
                     o2::soa::Index<>,
                     identitytrack::Eta,
                     identitytrack::Phi,
@@ -57,17 +63,27 @@ namespace o2::aod {
                     identitytrack::P,
                     identitytrack::Ptot,
                     identitytrack::Pt,
-                    identitytrack::Chi2Ndf
+                    identitytrack::TpcChi2NCl,
+                    identitytrack::TpcNClsCrossedRows,
+                    identitytrack::Dcaxy,
+                    identitytrack::Dcaz,
+                    identitytrack::ItsRefit,
+                    identitytrack::ItsPixel,
+                    identitytrack::TpcSignal,
+                    identitytrack::TpcSignalExpected,
+                    identitytrack::TpcSigmaExpected
                     );
 
-    DECLARE_SOA_TABLE(IdentityW, "AOD", "IDENTITYW",
+    DECLARE_SOA_TABLE(IdentityWs, "AOD", "IDENTITYWS",
                     o2::soa::Index<>,
-                    identityws::CollisionW);
+                    identityws::CollisionW
+                    );
 
-    DECLARE_SOA_TABLE(IdentityProb, "AOD", "IDENTITYPROB",
+    DECLARE_SOA_TABLE(IdentityProbs, "AOD", "IDENTITYPROBS",
                     o2::soa::Index<>,
                     identityprobs::Rhos,
-                    identityprobs::Omegas);
+                    identityprobs::Omegas
+                    );
     
 }; // namespace o2::aod
 
