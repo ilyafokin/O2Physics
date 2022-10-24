@@ -15,7 +15,23 @@
         "fEtaMaxLoose": 0.8,
         "fVertexZMaxLoose": 10
     },
-    "net-proton-cumulants": {
+    "net-proton-cumulants-histograms": {
+        "fMomMin": 0.2,
+        "fMomMax": 10,
+        "fChi2NdfMax": 2.5,
+        "fEtaMax": 0.8,
+        "fNTPCClusterMin": 80,
+        "fVertexZMin": 0,
+        "fVertexZMax": 10,
+        "fDcaxyA": 0.0208,
+        "fDcaxyB": 0.004,
+        "fDcaxyC": -1.01,
+        "fDcazA": 3,
+        "fDcazB": 0,
+        "fDcazC": 0
+    },
+    "net-proton-cumulants-identity": {
+        "fFitResultsPath": "idMethodInput_fullrange.root",
         "fMomMin": 0.2,
         "fMomMax": 10,
         "fChi2NdfMax": 2.5,
